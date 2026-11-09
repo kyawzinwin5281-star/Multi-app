@@ -1,15 +1,12 @@
-const CACHE_NAME = 'multi-app-v1.0.1';
+const CACHE_NAME = 'multi-app-v2.0';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/manifest.json'
 ];
 
-// Service Worker တပ်ဆင်ခြင်းနှင့် Cache ပြုလုပ်ခြင်း
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Version အသစ်ထွက်တာနဲ့ ချက်ချင်း အစားထိုး အလုပ်လုပ်မည်
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -17,7 +14,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Version အဟောင်းများကို ရှင်းထုတ်ခြင်း
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -28,30 +24,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Push Notification လာသည့်အခါ အလိုအလျောက် ပေါ့ပ်အပ် တက်စေခြင်း
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Multi App Notification';
-  const options = {
-    body: data.body || 'စာလေ့လာရန် အချိန်ရောက်ပါပြီ။',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    vibrate: [200, 100, 200], // ဖုန်း တုန်ခါမှု ပုံစံ
-    requireInteraction: true, // အသုံးပြုသူ ကိုယ်တိုင် ပွတ်ဆွဲမပိတ်မချင်း ပေါ်နေမည်
-    data: {
-      url: data.url || '/'
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// Notification ကို နှိပ်လိုက်ပါက App ဖွင့်ပေးခြင်း
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).catch(() => {
+        return caches.match('/index.html');
+      });
+    })
   );
 });
