@@ -4,8 +4,8 @@
   "description": "A premium personal workspace PWA with calendar, tasks, and notes.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
+"background_color": "#ffffff",
+"theme_color": "#ffffff"
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3239/3239952.png",
