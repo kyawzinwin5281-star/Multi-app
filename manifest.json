@@ -12,4 +12,10 @@
       "type": "image/png"
     },
     {
-      "src": "
+      "src":  "https://cdn-icons-png.flaticon.com/512/3112/3112948.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    }
+
