@@ -6,6 +6,7 @@
     <title>Multi App - Personal Workspace</title>
     
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="sw.js">
     <meta name="theme-color" id="meta-theme-color" content="#4f46e5">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3239/3239952.png">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3239/3239952.png">
@@ -653,6 +654,15 @@
     </main>
 
     <script>
+        // Service Worker ဖြင့် Auto-update & Offline support ချိတ်ဆက်ခြင်း
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((reg) => console.log('Service Worker Registered:', reg))
+                    .catch((err) => console.error('Service Worker Error:', err));
+            });
+        }
+
         let audioCtx = null;
         let alarmInterval = null;
 
@@ -700,14 +710,13 @@
             }
         }
 
-        // တုန်ခါမှု အလွန်အမင်း မပြင်းထန်စေရန် အပျော့စား vibration (25ms) သို့ ပြောင်းထားသည်
         function vibrate() {
             if (navigator.vibrate) navigator.vibrate(25);
         }
 
         function showCustomPopup(title, message) {
             playContinuousAlarm();
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Alarm တက်ချိန်တွင်သာ အနည်းငယ်တုန်မည်
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             document.getElementById('popup-title').innerText = title;
             document.getElementById('popup-message').innerText = message;
             document.getElementById('custom-popup-overlay').classList.add('show');
@@ -764,7 +773,7 @@
             if (db.title) updateTitle(db.title, false);
 
             renderAll();
-            checkReminders(); // App ဖွင့်ဖွင့်ချင်း အချိန်လွန်နေသည်များကို စစ်ဆေးရန်
+            checkReminders();
         }
 
         function saveStorage() {
@@ -967,7 +976,6 @@
                 document.getElementById('reminder-time').value = '';
                 saveStorage();
                 renderTasks();
-                // "Reminder Saved" ဟု မပေါ်စေဘဲ ချက်ချင်း သိမ်းဆည်းပေးမည် (Notification sound/popup မမြည်စေရန်)
             } else {
                 alert('Please fill in description and time!');
             }
@@ -1069,7 +1077,6 @@
             a.click();
         }
 
-        // အချိန်တိကျစွာ တိုက်ဆိုင်စစ်ဆေးသည့် Function
         function checkReminders() {
             if (!db.tasks || db.tasks.length === 0) return;
             const nowTime = new Date().getTime();
@@ -1085,17 +1092,14 @@
             });
         }
 
-        // တစ်စက္ကန့်တစ်ကြိမ် စစ်ဆေးမည်
         setInterval(checkReminders, 1000);
 
-        // Tab ပြန်ဖွင့်လာချိန် သို့မဟုတ် Screen ပြန်ဖွင့်ချိန်တွင် ချက်ချင်း စစ်ဆေးရန်
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 checkReminders();
             }
         });
 
-        // Focus Timer Logic
         let timerInterval, timeLeft = 0;
         function updateTimerDisplay() {
             let m = Math.floor(timeLeft / 60);
