@@ -658,13 +658,53 @@
     </main>
 
     <script>
-               window.addEventListener('load', () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(() => splash.remove(), 500);
-                }
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => {
+            splash.style.display = 'none';
+          }, 800);
+        }
+      }, 800);
+
+      // Notification Permission Request
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      }
+    });
+
+        }
+      }, 800);
+
+      // Notification Permission Request
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      }
+    });
+
+      const splash = document.getElementById('splash-screen');
+      if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => splash.style.display = 'none', 800);
+      }
+    }, 800);
+
+    // Notification Permission Request
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+
+        splash.style.opacity = '0';
+        setTimeout(() => splash.style.display = 'none', 800);
+      }
+    }, 800);
+
+    // *ဒီနေရာမှာ အခုပေးမယ့် Notification ကုဒ်ကို ထည့်ပါ*
+
+  });
+       }
             }, 800);
         });
  // Service Worker ဖြင့် Auto-update & Offline support ချိတ်ဆက်ခြင်း
