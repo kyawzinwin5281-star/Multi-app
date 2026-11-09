@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Multi App - Personal Workspace</title>
+    
+    <!-- PWA & Icon Integration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" id="meta-theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3239/3239952.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3239/3239952.png">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --input-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius: 16px;
+            --font-size: 14px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            --glass-border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        body.dark-mode {
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --input-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-border: 1px solid rgba(51, 65, 85, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text-main);
+            font-size: var(--font-size);
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        #splash-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-logo-circle {
+            width: 80px;
+            height: 80px;
+            background: var(--primary, #4f46e5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            box-shadow: 0 0 30px rgba(79, 70, 229, 0.5);
+            margin-bottom: 20px;
+            animation: pulseSplash 1.5s infinite alternate;
+        }
+
+        @keyframes pulseSplash {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        #splash-screen h2 {
+            color: #f8fafc;
+            font-size: 1.35rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 0 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px 8px 20px;
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .header-btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .share-header-btn {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        body.dark-mode .share-header-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-wrapper {
+            width: 100%;
+            padding: 8px 12px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: var(--card-bg);
+            padding: 8px;
+            border-radius: var(--radius);
+            border: var(--glass-border);
+            box-shadow: var(--shadow);
+            justify-content: center;
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        body.dark-mode .tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .main-content {
+            padding: 12px 16px 40px 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: var(--glass-border);
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+
+        .weather-banner {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            border-radius: var(--radius);
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .cal-nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+
+        .cal-day-name {
+            font-weight: 600;
+            color: var(--text-muted);
+            padding-bottom: 6px;
+            font-size: 0.8rem;
+        }
+
+        .cal-date {
+            padding: 10px 0;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .cal-date.active {
+            background: var(--primary-light);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .calc-btn {
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            border: var(--glass-border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: center;
+            user-select: none;
+        }
+
+        .calc-btn.op {
+            background: var(--primary);
+            color: white;
+        }
+
+        input, select, textarea, button.action-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: var(--glass-border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            margin-top: 6px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        button.action-btn {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-danger {
+            background: var(--danger) !important;
+        }
+        .btn-success {
+            background: var(--success) !important;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--input-bg);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: var(--glass-border);
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        body.dark-mode .delete-btn {
+            background: #451a1a;
+            color: #f87171;
+        }
+
+        .report-box {
+            padding: 12px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            border: var(--glass-border);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 6px;
+            margin-bottom: 12px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .search-box {
+            margin-bottom: 12px;
+        }
+
+        .app-exchange-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .app-exchange-card {
+            background: var(--input-bg);
+            border: var(--glass-border);
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .color-settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        .color-picker-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--input-bg);
+            border: var(--glass-border);
+            padding: 8px 12px;
+            border-radius: 10px;
+        }
+        .color-picker-item input[type="color"] {
+            width: 36px;
+            height: 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Smooth Splash Screen -->
+    <div id="splash-screen">
+        <div class="splash-logo-circle">🔔</div>
+        <h2>Focus on your dream not mood</h2>
+    </div>
+
+    <header class="app-header">
+        <div class="app-title" id="app-header-title">🔔 Multi App</div>
+        <div class="header-btn-group">
+            <button class="share-header-btn" onclick="vibrate(); shareApp()">🔗 Share</button>
+        </div>
+    </header>
+
+    <div class="nav-wrapper">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab(this, 'calendar')">📅 Calendar</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tasks-list')">✅ Tasks</button>
+            <button class="tab-btn" onclick="switchTab(this, 'notes')">📝 Notes</button>
+            <button class="tab-btn" onclick="switchTab(this, 'features')">🧰 Features</button>
+            <button class="tab-btn" onclick="switchTab(this, 'reports')">📊 Reports</button>
+            <button class="tab-btn" onclick="switchTab(this, 'settings')">⚙️ Settings</button>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <!-- Weather Banner -->
+        <div class="weather-banner">
+            <div>
+                <h4 style="font-size: 1.1rem;" id="weather-city">Detecting Location...</h4>
+                <p style="font-size: 0.85rem; opacity: 0.9;" id="weather-desc">Fetching live weather...</p>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 700;" id="weather-temp">--°C</div>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div id="tab-calendar" class="tab-pane active">
+            <div class="card">
+                <div class="cal-header">
+                    <button class="cal-nav-btn" onclick="vibrate(); changeMonth(-1)">◄</button>
+                    <h3 id="cal-month-title">November 2026</h3>
+                    <button class="cal-nav-btn" onclick="vibrate(); changeMonth(1)">►</button>
+                </div>
+                <div class="cal-grid">
+                    <div class="cal-day-name">Sun</div>
+                    <div class="cal-day-name">Mon</div>
+                    <div class="cal-day-name">Tue</div>
+                    <div class="cal-day-name">Wed</div>
+                    <div class="cal-day-name">Thu</div>
+                    <div class="cal-day-name">Fri</div>
+                    <div class="cal-day-name">Sat</div>
+                </div>
+                <div class="cal-grid" id="cal-dates-container" style="margin-top: 8px;"></div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">Add New Reminder / Task</h3>
+                <label style="font-weight: 600;">Selected Date</label>
+                <input type="date" id="reminder-date" value="2026-11-09">
+
+                <label style="font-weight: 600;">Task Description</label>
+                <input type="text" id="reminder-desc" placeholder="e.g. Read a book / Meeting">
+
+                <label style="font-weight: 600;">Notification Time</label>
+                <input type="time" id="reminder-time">
+
+                <label style="font-weight: 600;">Priority Level</label>
+                <select id="reminder-priority">
+                    <option value="High">High</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+
+                <button class="action-btn" onclick="vibrate(); saveReminder()" style="margin-top: 8px;">Save Task & Reminder</button>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tab-tasks-list" class="tab-pane">
+            <div class="card">
+                <h3>Task Completion Progress (<span id="task-progress-text">0%</span>)</h3>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="task-progress-bar"></div></div>
+
+                <input type="text" id="task-search" class="search-box" placeholder="🔍 Search tasks..." oninput="filterTasks(this.value)">
+
+                <h3>Task Lists</h3>
+                <input type="text" id="task-input" placeholder="Add new task...">
+                <button class="action-btn" onclick="vibrate(); addTask()">Add Task</button>
+                <div id="tasks-container" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="tab-notes" class="tab-pane">
+            <div class="card">
+                <input type="text" id="note-search" class="search-box" placeholder="🔍 Search notes..." oninput="filterNotes(this.value)">
+                <h3>Notes</h3>
+                <textarea id="note-input" placeholder="Write quick notes..." rows="4"></textarea>
+                <button class="action-btn" onclick="vibrate(); saveNote()">Save Note</button>
+                <div id="notes-container" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Features Tab -->
+        <div id="tab-features" class="tab-pane">
+            <div class="card">
+                <h3>🌐 External Apps & AI Exchange</h3>
+                <div class="app-exchange-grid">
+                    <a href="https://chatgpt.com" target="_blank" class="app-exchange-card" onclick="vibrate()"><span style="font-size: 1.5rem;">🤖</span> ChatGPT</a>
+                    <a href="https://gemini.google.com" target="_blank" class="app-exchange-card" onclick="vibrate()"><span style="font-size: 1.5rem;">✨</span> Gemini</a>
+                    <a href="https://www.google.com" target="_blank" class="app-exchange-card" onclick="vibrate()"><span style="font-size: 1.5rem;">🔍</span> Search</a>
+                    <a href="https://translate.google.com" target="_blank" class="app-exchange-card" onclick="vibrate()"><span style="font-size: 1.5rem;">🔤</span> Translate</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⏱️ Custom Focus Timer</h3>
+                <div style="text-align: center; margin: 15px 0;">
+                    <h1 id="timer-display" style="font-size: 2.8rem; color: var(--primary);">00:00</h1>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="font-weight: 600;">Set Custom Minutes:</label>
+                    <input type="number" id="timer-minutes-input" min="1" max="180" placeholder="Enter minutes (e.g. 25)" onchange="vibrate(); updateTimerMinutes()">
+                </div>
+                <div class="btn-group">
+                    <button class="action-btn btn-success" onclick="vibrate(); startTimer()">Start</button>
+                    <button class="action-btn btn-danger" onclick="vibrate(); pauseTimer()">Pause</button>
+                    <button class="action-btn" onclick="vibrate(); resetTimer()">Reset</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🧮 Quick Calculator</h3>
+                <input type="text" id="calc-display" readonly style="text-align: right; font-size: 1.4rem; font-weight: 700;">
+                <div class="calc-grid">
+                    <button class="calc-btn" onclick="vibrate(); calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('9')">9</button>
+                    <button class="calc-btn op" onclick="vibrate(); calcInput('/')">÷</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('6')">6</button>
+                    <button class="calc-btn op" onclick="vibrate(); calcInput('*')">×</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('3')">3</button>
+                    <button class="calc-btn op" onclick="vibrate(); calcInput('-')">-</button>
+                    <button class="calc-btn" onclick="vibrate(); calcInput('0')">0</button>
+                    <button class="calc-btn" onclick="vibrate(); calcClear()">C</button>
+                    <button class="calc-btn op" onclick="vibrate(); calcSolve()">=</button>
+                    <button class="calc-btn op" onclick="vibrate(); calcInput('+')">+</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Career & Academic Target Checklist</h3>
+                <input type="text" id="target-input" placeholder="e.g. HR KPI audit / Law notes">
+                <button class="action-btn" onclick="vibrate(); addTarget()">Add Target</button>
+                <div id="target-container"></div>
+            </div>
+
+            <div class="card">
+                <h3>💰 Daily Expense Tracker</h3>
+                <input type="text" id="expense-title" placeholder="Item / Title (e.g. Coffee)">
+                <input type="number" id="expense-amount" placeholder="Amount (MMK)">
+                <button class="action-btn" onclick="vibrate(); addExpense()">Add Expense</button>
+                <div id="expense-container" style="margin-top: 10px;"></div>
+                <h4 style="margin-top: 10px; text-align: right;">Total: <span id="expense-total">0</span> MMK</h4>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="tab-reports" class="tab-pane">
+            <div class="card">
+                <h3>📊 Reports & Workspace Analytics</h3>
+                <div class="report-box"><span>Total Tasks</span><strong id="report-task-count" style="color: var(--primary);">0</strong></div>
+                <div class="report-box"><span>Total Notes</span><strong id="report-note-count" style="color: var(--primary);">0</strong></div>
+                <div class="report-box"><span>Total Targets</span><strong id="report-target-count" style="color: var(--primary);">0</strong></div>
+                <div class="report-box"><span>Total Expense</span><strong style="color: var(--danger);"><span id="report-expense-total">0</span> MMK</strong></div>
+                <button class="action-btn" onclick="vibrate(); exportDataTxt()" style="margin-top: 10px; background: #059669;">📥 Export Workspace (.txt)</button>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="tab-settings" class="tab-pane">
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">⚙️ App Settings</h3>
+                
+                <label style="font-weight: 600;">Workspace Custom Title</label>
+                <input type="text" id="setting-title-input" value="Multi App" onchange="vibrate(); updateTitle(this.value)">
+
+                <label style="font-weight: 600;">Theme Mode</label>
+                <select id="theme-select" onchange="vibrate(); toggleTheme(this.value)">
+                    <option value="light">Light Mode</option>
+                    <option value="dark">Dark Mode</option>
+                </select>
+
+                <h4 style="margin-top: 15px; margin-bottom: 6px;">🎨 Custom Theme Colors</h4>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px;">Customize individual component colors of your workspace.</p>
+                
+                <div class="color-settings-grid">
+                    <div class="color-picker-item">
+                        <span>Primary</span>
+                        <input type="color" id="picker-primary" value="#4f46e5" onchange="updateCustomColor('primary', this.value)">
+                    </div>
+                    <div class="color-picker-item">
+                        <span>Background</span>
+                        <input type="color" id="picker-bg" value="#f8fafc" onchange="updateCustomColor('bg', this.value)">
+                    </div>
+                    <div class="color-picker-item">
+                        <span>Card BG</span>
+                        <input type="color" id="picker-card" value="#ffffff" onchange="updateCustomColor('card', this.value)">
+                    </div>
+                    <div class="color-picker-item">
+                        <span>Text Main</span>
+                        <input type="color" id="picker-text" value="#0f172a" onchange="updateCustomColor('text', this.value)">
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="vibrate(); resetDefaultColors()" style="background: #64748b; margin-top: 4px;">🔄 Reset Default Colors</button>
+
+                <label style="font-weight: 600; margin-top: 12px;">Font Size</label>
+                <select id="font-size-select" onchange="vibrate(); changeFontSize(this.value)">
+                    <option value="12px">Small (12px)</option>
+                    <option value="14px" selected>Normal (14px)</option>
+                    <option value="16px">Large (16px)</option>
+                </select>
+
+                <button class="action-btn" onclick="vibrate(); alert('Settings Saved Successfully!');" style="margin-top: 8px;">Save Settings</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.classList.add('fade-out');
+                    setTimeout(() => splash.remove(), 800);
+                }
+            }, 3000);
+        });
+
+        function vibrate() {
+            if (navigator.vibrate) navigator.vibrate(30);
+        }
+
+        function shareApp() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Multi App - Workspace',
+                    text: 'Check out my All-in-One Personal Workspace PWA App!',
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('App Link copied to clipboard!');
+            }
+        }
+
+        let db = {
+            tasks: [],
+            notes: [],
+            targets: [],
+            expenses: [],
+            theme: 'light',
+            fontSize: '14px',
+            title: 'Multi App',
+            customColors: {
+                primary: '#4f46e5',
+                bg: '#f8fafc',
+                card: '#ffffff',
+                text: '#0f172a'
+            }
+        };
+
+        function loadStorage() {
+            const saved = localStorage.getItem('multi_app_db');
+            if (saved) db = JSON.parse(saved);
+            
+            if (db.theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-select').value = 'dark';
+            }
+            if (db.customColors) {
+                applyCustomColors(db.customColors);
+            }
+            changeFontSize(db.fontSize || '14px');
+            document.getElementById('font-size-select').value = db.fontSize || '14px';
+            if (db.title) updateTitle(db.title, false);
+
+            renderAll();
+        }
+
+        function saveStorage() {
+            localStorage.setItem('multi_app_db', JSON.stringify(db));
+            updateReports();
+        }
+
+        function updateCustomColor(key, value) {
+            vibrate();
+            if (!db.customColors) db.customColors = {};
+            db.customColors[key] = value;
+            applyCustomColors(db.customColors);
+            saveStorage();
+        }
+
+        function applyCustomColors(colors) {
+            if (colors.primary) {
+                document.documentElement.style.setProperty('--primary', colors.primary);
+                document.documentElement.style.setProperty('--primary-hover', colors.primary);
+                document.documentElement.style.setProperty('--primary-light', colors.primary + '22');
+                document.getElementById('meta-theme-color').setAttribute('content', colors.primary);
+                const pPicker = document.getElementById('picker-primary');
+                if (pPicker) pPicker.value = colors.primary;
+            }
+            if (colors.bg && db.theme !== 'dark') {
+                document.documentElement.style.setProperty('--bg', colors.bg);
+                const bgPicker = document.getElementById('picker-bg');
+                if (bgPicker) bgPicker.value = colors.bg;
+            }
+            if (colors.card && db.theme !== 'dark') {
+                document.documentElement.style.setProperty('--card-bg', colors.card);
+                document.documentElement.style.setProperty('--input-bg', colors.card);
+                const cardPicker = document.getElementById('picker-card');
+                if (cardPicker) cardPicker.value = colors.card;
+            }
+            if (colors.text && db.theme !== 'dark') {
+                document.documentElement.style.setProperty('--text-main', colors.text);
+                const textPicker = document.getElementById('picker-text');
+                if (textPicker) textPicker.value = colors.text;
+            }
+        }
+
+        function resetDefaultColors() {
+            db.customColors = {
+                primary: '#4f46e5',
+                bg: '#f8fafc',
+                card: '#ffffff',
+                text: '#0f172a'
+            };
+            applyCustomColors(db.customColors);
+            saveStorage();
+            alert('Colors reset to default!');
+        }
+
+        function switchTab(btn, tabId) {
+            vibrate();
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            const targetPane = document.getElementById('tab-' + tabId);
+            if(targetPane) targetPane.classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function toggleTheme(mode) {
+            db.theme = mode;
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (db.customColors) applyCustomColors(db.customColors);
+            }
+            saveStorage();
+        }
+
+        function changeFontSize(size) {
+            db.fontSize = size;
+            document.documentElement.style.setProperty('--font-size', size);
+            saveStorage();
+        }
+
+        function updateTitle(val, save = true) {
+            document.getElementById('app-header-title').innerText = '🔔 ' + val;
+            if(save) { db.title = val; saveStorage(); }
+        }
+
+        function fetchWeather() {
+            if (!navigator.onLine) {
+                document.getElementById('weather-city').innerText = 'Offline Mode';
+                document.getElementById('weather-desc').innerText = 'Local Workspace Active';
+                document.getElementById('weather-temp').innerText = '--°C';
+                return;
+            }
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    let lat = position.coords.latitude;
+                    let lon = position.coords.longitude;
+                    try {
+                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                        const data = await res.json();
+                        if (data && data.current_weather) {
+                            document.getElementById('weather-temp').innerText = Math.round(data.current_weather.temperature) + '°C';
+                            document.getElementById('weather-desc').innerText = 'Live Weather • Wind ' + data.current_weather.windspeed + ' km/h';
+                            document.getElementById('weather-city').innerText = 'Current Location';
+                        }
+                    } catch (e) { fallbackWeather(); }
+                }, () => { fallbackWeather(); });
+            } else { fallbackWeather(); }
+        }
+
+        async function fallbackWeather() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=16.8661&longitude=96.1585&current_weather=true');
+                const data = await res.json();
+                if (data && data.current_weather) {
+                    document.getElementById('weather-city').innerText = 'Yangon, Myanmar';
+                    document.getElementById('weather-temp').innerText = Math.round(data.current_weather.temperature) + '°C';
+                    document.getElementById('weather-desc').innerText = 'Live Weather';
+                }
+            } catch (e) {
+                document.getElementById('weather-city').innerText = 'Yangon, Myanmar';
+                document.getElementById('weather-desc').innerText = 'Partly Cloudy';
+                document.getElementById('weather-temp').innerText = '29°C';
+            }
+        }
+        window.addEventListener('online', fetchWeather);
+        fetchWeather();
+
+        function renderCalendar() {
+            const container = document.getElementById('cal-dates-container');
+            container.innerHTML = '';
+            for (let i = 1; i <= 30; i++) {
+                const dateEl = document.createElement('div');
+                dateEl.className = 'cal-date' + (i === 9 ? ' active' : '');
+                dateEl.innerText = i;
+                dateEl.onclick = function() {
+                    vibrate();
+                    document.querySelectorAll('.cal-date').forEach(e => e.classList.remove('active'));
+                    dateEl.classList.add('active');
+                    document.getElementById('reminder-date').value = `2026-11-${i < 10 ? '0' + i : i}`;
+                };
+                container.appendChild(dateEl);
+            }
+        }
+        renderCalendar();
+
+        function renderAll() {
+            renderTasks();
+            renderNotes();
+            renderTargets();
+            renderExpenses();
+            updateReports();
+        }
+
+        function renderTasks(filter = '') {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '';
+            let completed = 0;
+            db.tasks.filter(t => t.text.toLowerCase().includes(filter.toLowerCase())).forEach((t, i) => {
+                if (t.done) completed++;
+                let div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" style="width:auto; margin-right:8px;"> ${t.text}</span> 
+                <button class="delete-btn" onclick="vibrate(); deleteTask(${i})">Delete</button>`;
+                container.appendChild(div);
+            });
+            let pct = db.tasks.length ? Math.round((completed / db.tasks.length) * 100) : 0;
+            document.getElementById('task-progress-bar').style.width = pct + '%';
+            document.getElementById('task-progress-text').innerText = pct + '%';
+        }
+
+        function addTask() {
+            let val = document.getElementById('task-input').value;
+            if (val) {
+                db.tasks.push({ text: val, done: false });
+                document.getElementById('task-input').value = '';
+                saveStorage();
+                renderTasks();
+            }
+        }
+
+        function saveReminder() {
+            let date = document.getElementById('reminder-date').value;
+            let desc = document.getElementById('reminder-desc').value;
+            let time = document.getElementById('reminder-time').value;
+            let priority = document.getElementById('reminder-priority').value;
+            if (desc) {
+                let fullText = `[${priority}] ${desc} (${date} ${time ? 'at ' + time : ''})`;
+                db.tasks.push({ text: fullText, done: false, reminderTime: `${date}T${time}` });
+                document.getElementById('reminder-desc').value = '';
+                saveStorage();
+                renderTasks();
+                alert('Reminder Task Saved!');
+            }
+        }
+
+        function toggleTask(i) { db.tasks[i].done = !db.tasks[i].done; saveStorage(); renderTasks(); }
+        function deleteTask(i) { db.tasks.splice(i, 1); saveStorage(); renderTasks(); }
+        function filterTasks(val) { renderTasks(val); }
+
+        function renderNotes(filter = '') {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+            db.notes.filter(n => n.toLowerCase().includes(filter.toLowerCase())).forEach((n, i) => {
+                let div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${n}</span> <button class="delete-btn" onclick="vibrate(); deleteNote(${i})">Delete</button>`;
+                container.appendChild(div);
+            });
+        }
+        function saveNote() {
+            let val = document.getElementById('note-input').value;
+            if (val) {
+                db.notes.push(val);
+                document.getElementById('note-input').value = '';
+                saveStorage();
+                renderNotes();
+            }
+        }
+        function deleteNote(i) { db.notes.splice(i, 1); saveStorage(); renderNotes(); }
+        function filterNotes(val) { renderNotes(val); }
+
+        function renderTargets() {
+            const container = document.getElementById('target-container');
+            container.innerHTML = '';
+            db.targets.forEach((t, i) => {
+                let div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTarget(${i})" style="width:auto; margin-right:8px;"> ${t.text}</span> 
+                <button class="delete-btn" onclick="vibrate(); deleteTarget(${i})">Delete</button>`;
+                container.appendChild(div);
+            });
+        }
+        function addTarget() {
+            let val = document.getElementById('target-input').value;
+            if (val) {
+                db.targets.push({ text: val, done: false });
+                document.getElementById('target-input').value = '';
+                saveStorage();
+                renderTargets();
+            }
+        }
+        function toggleTarget(i) { db.targets[i].done = !db.targets[i].done; saveStorage(); renderTargets(); }
+        function deleteTarget(i) { db.targets.splice(i, 1); saveStorage(); renderTargets(); }
+
+        function renderExpenses() {
+            const container = document.getElementById('expense-container');
+            container.innerHTML = '';
+            let total = 0;
+            db.expenses.forEach((e, i) => {
+                total += e.amount;
+                let div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${e.title} (<strong>${e.amount} MMK</strong>)</span> <button class="delete-btn" onclick="vibrate(); deleteExpense(${i})">Delete</button>`;
+                container.appendChild(div);
+            });
+            document.getElementById('expense-total').innerText = total;
+        }
+        function addExpense() {
+            let t = document.getElementById('expense-title').value;
+            let a = parseFloat(document.getElementById('expense-amount').value);
+            if (t && a) {
+                db.expenses.push({ title: t, amount: a });
+                document.getElementById('expense-title').value = '';
+                document.getElementById('expense-amount').value = '';
+                saveStorage();
+                renderExpenses();
+            }
+        }
+        function deleteExpense(i) { db.expenses.splice(i, 1); saveStorage(); renderExpenses(); }
+
+        function updateReports() {
+            document.getElementById('report-task-count').innerText = db.tasks.length;
+            document.getElementById('report-note-count').innerText = db.notes.length;
+            document.getElementById('report-target-count').innerText = db.targets.length;
+            let expTotal = db.expenses.reduce((sum, item) => sum + item.amount, 0);
+            document.getElementById('report-expense-total').innerText = expTotal;
+        }
+
+        function exportDataTxt() {
+            let expTotal = db.expenses.reduce((sum, item) => sum + item.amount, 0);
+            let content = `=== WORKSPACE SUMMARY REPORT ===\n\n` +
+                `Total Tasks (${db.tasks.length}):\n` + db.tasks.map(t => `- [${t.done ? 'X' : ' '}] ${t.text}`).join('\n') + `\n\n` +
+                `Total Notes (${db.notes.length}):\n` + db.notes.map(n => `- ${n}`).join('\n') + `\n\n` +
+                `Total Expenses: ${expTotal} MMK\n` + db.expenses.map(e => `- ${e.title}: ${e.amount} MMK`).join('\n');
+            let blob = new Blob([content], { type: 'text/plain' });
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Workspace_Report_${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+        }
+
+        let timerInterval, timeLeft = 0;
+        function updateTimerDisplay() {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timer-display').innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+        function updateTimerMinutes() {
+            let mins = parseInt(document.getElementById('timer-minutes-input').value) || 0;
+            timeLeft = mins * 60;
+            updateTimerDisplay();
+        }
+        function startTimer() {
+            if (timeLeft <= 0) return;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); } 
+                else { clearInterval(timerInterval); vibrate(); alert("⏱️ Focus Timer Finished!"); }
+            }, 1000);
+        }
+        function pauseTimer() { clearInterval(timerInterval); }
+        function resetTimer() { pauseTimer(); document.getElementById('timer-minutes-input').value = ''; timeLeft = 0; updateTimerDisplay(); }
+
+        let calcVal = '';
+        function calcInput(val) { calcVal += val; document.getElementById('calc-display').value = calcVal; }
+        function calcClear() { calcVal = ''; document.getElementById('calc-display').value = ''; }
+        function calcSolve() {
+            try { calcVal = eval(calcVal).toString(); document.getElementById('calc-display').value = calcVal; } 
+            catch(e) { document.getElementById('calc-display').value = 'Error'; calcVal = ''; }
+        }
+
+        loadStorage();
+    </script>
+</body>
+</html>
