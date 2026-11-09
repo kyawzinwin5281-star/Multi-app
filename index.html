@@ -424,6 +424,10 @@
     </style>
 </head>
 <body>
+    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; transition: opacity 0.5s ease;">
+        <h1 style="color: var(--primary); font-size: 2rem; font-weight: 700; margin-bottom: 10px;">🔔 Multi App</h1>
+        <p style="color: var(--text-muted); font-size: 1rem;">Personal Workspace Active...</p>
+    </div>
 
     <div id="custom-popup-overlay">
         <div class="custom-popup-box">
@@ -654,7 +658,16 @@
     </main>
 
     <script>
-        // Service Worker ဖြင့် Auto-update & Offline support ချိတ်ဆက်ခြင်း
+               window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => splash.remove(), 500);
+                }
+            }, 800);
+        });
+ // Service Worker ဖြင့် Auto-update & Offline support ချိတ်ဆက်ခြင်း
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
